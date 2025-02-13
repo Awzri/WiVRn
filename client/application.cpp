@@ -252,6 +252,16 @@ static std::vector<interaction_profile> interaction_profiles{
                         "/user/hand/right/input/thumbrest/touch",
                 }},
         interaction_profile{
+                "/interaction_profiles/htc/vive_xr_tracker",
+                {"XR_HTC_vive_xr_tracker_interaction"},
+                {
+                        "/user/xr_tracker_htc/vive_ultimate_tracker_0/input/entity_htc/pose",
+                        "/user/xr_tracker_htc/vive_ultimate_tracker_1/input/entity_htc/pose",
+                        "/user/xr_tracker_htc/vive_ultimate_tracker_2/input/entity_htc/pose",
+                        "/user/xr_tracker_htc/vive_ultimate_tracker_3/input/entity_htc/pose",
+                        "/user/xr_tracker_htc/vive_ultimate_tracker_4/input/entity_htc/pose",
+                }},
+        interaction_profile{
                 "/interaction_profiles/ext/eye_gaze_interaction",
                 {"XR_EXT_eye_gaze_interaction"},
                 {
@@ -695,6 +705,16 @@ void application::initialize_actions()
 			spaces[size_t(xr::spaces::palm_right)] = xr_session.create_action_space(a);
 		else if (name == "/user/hand/left/input/palm_ext/pose")
 			spaces[size_t(xr::spaces::palm_left)] = xr_session.create_action_space(a);
+		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_0/input/entity_htc/pose")
+			spaces[size_t(xr::spaces::tracker_0)] = xr_session.create_action_space(a);
+		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_1/input/entity_htc/pose")
+			spaces[size_t(xr::spaces::tracker_1)] = xr_session.create_action_space(a);
+		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_2/input/entity_htc/pose")
+			spaces[size_t(xr::spaces::tracker_2)] = xr_session.create_action_space(a);
+		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_3/input/entity_htc/pose")
+			spaces[size_t(xr::spaces::tracker_3)] = xr_session.create_action_space(a);
+		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_4/input/entity_htc/pose")
+			spaces[size_t(xr::spaces::tracker_4)] = xr_session.create_action_space(a);
 	}
 
 	// Build an action set for each scene

@@ -787,6 +787,11 @@ void scenes::lobby::render(const XrFrameState & frame_state)
 	{
 		const xr::spaces left = display_grip_instead_of_aim ? xr::spaces::grip_left : xr::spaces::aim_left;
 		const xr::spaces right = display_grip_instead_of_aim ? xr::spaces::grip_right : xr::spaces::aim_right;
+		const xr::spaces tracker_0 = xr::spaces::tracker_0;
+		const xr::spaces tracker_1 = xr::spaces::tracker_1;
+		const xr::spaces tracker_2 = xr::spaces::tracker_2;
+		const xr::spaces tracker_3 = xr::spaces::tracker_3;
+		const xr::spaces tracker_4 = xr::spaces::tracker_4;
 
 		if (hide_left_controller)
 			xyz_axes_left_controller->visible = false;
@@ -809,6 +814,21 @@ void scenes::lobby::render(const XrFrameState & frame_state)
 		}
 		else
 			xyz_axes_right_controller->visible = false;
+		auto tracker_location_0 = application::locate_controller(application::space(tracker_0), world_space, frame_state.predictedDisplayTime);
+		auto tracker_location_1 = application::locate_controller(application::space(tracker_1), world_space, frame_state.predictedDisplayTime);
+		auto tracker_location_2 = application::locate_controller(application::space(tracker_2), world_space, frame_state.predictedDisplayTime);
+		auto tracker_location_3 = application::locate_controller(application::space(tracker_3), world_space, frame_state.predictedDisplayTime);
+		auto tracker_location_4 = application::locate_controller(application::space(tracker_4), world_space, frame_state.predictedDisplayTime);
+		xyz_axes_tracker_0->position = tracker_location_0->first;
+		xyz_axes_tracker_0->orientation = tracker_location_0->second;
+		xyz_axes_tracker_1->position = tracker_location_1->first;
+		xyz_axes_tracker_1->orientation = tracker_location_1->second;
+		xyz_axes_tracker_2->position = tracker_location_2->first;
+		xyz_axes_tracker_2->orientation = tracker_location_2->second;
+		xyz_axes_tracker_3->position = tracker_location_3->first;
+		xyz_axes_tracker_3->orientation = tracker_location_3->second;
+		xyz_axes_tracker_4->position = tracker_location_4->first;
+		xyz_axes_tracker_4->orientation = tracker_location_4->second;
 	}
 	else
 	{
@@ -1084,6 +1104,17 @@ void scenes::lobby::on_focused()
 
 	xyz_axes_right_controller = controllers_scene_data.new_node();
 	controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_right_controller);
+
+	xyz_axes_tracker_0 = controllers_scene_data.new_node();
+	controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_tracker_0);
+	xyz_axes_tracker_1 = controllers_scene_data.new_node();
+	controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_tracker_1);
+	xyz_axes_tracker_2 = controllers_scene_data.new_node();
+	controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_tracker_2);
+	xyz_axes_tracker_3 = controllers_scene_data.new_node();
+	controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_tracker_3);
+	xyz_axes_tracker_4 = controllers_scene_data.new_node();
+	controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_tracker_4);
 #endif
 
 	if (application::get_hand_tracking_supported())
