@@ -95,11 +95,7 @@ class lobby : public scene_impl<lobby>
 	// GUI debug
 	node_handle xyz_axes_left_controller;
 	node_handle xyz_axes_right_controller;
-	node_handle xyz_axes_tracker_0;
-	node_handle xyz_axes_tracker_1;
-	node_handle xyz_axes_tracker_2;
-	node_handle xyz_axes_tracker_3;
-	node_handle xyz_axes_tracker_4;
+	node_handle xyz_axes_tracker[5];
 	bool display_debug_axes = false;
 	bool display_grip_instead_of_aim = false;
 	glm::vec3 offset_position{};
