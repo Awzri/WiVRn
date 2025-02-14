@@ -741,7 +741,7 @@ void scenes::lobby::render(const XrFrameState & frame_state)
 
 	bool hide_left_controller = false;
 	bool hide_right_controller = false;
-	bool hide_tracker[5] = {false, false, false, false, false};
+	std::array<bool,5> hide_tracker;
 
 	std::optional<std::pair<glm::vec3, glm::quat>> head_position = application::locate_controller(application::space(xr::spaces::view), world_space, frame_state.predictedDisplayTime);
 	std::optional<glm::vec3> new_gui_position;
@@ -788,12 +788,12 @@ void scenes::lobby::render(const XrFrameState & frame_state)
 	{
 		const xr::spaces left = display_grip_instead_of_aim ? xr::spaces::grip_left : xr::spaces::aim_left;
 		const xr::spaces right = display_grip_instead_of_aim ? xr::spaces::grip_right : xr::spaces::aim_right;
-		const xr::spaces tracker[5] = {
-			xr::spaces::tracker_0,
-			xr::spaces::tracker_1,
-			xr::spaces::tracker_2,
-			xr::spaces::tracker_3,
-			xr::spaces::tracker_4,
+		const std::array tracker = {
+		        xr::spaces::tracker_0,
+		        xr::spaces::tracker_1,
+		        xr::spaces::tracker_2,
+		        xr::spaces::tracker_3,
+		        xr::spaces::tracker_4,
 		};
 
 		if (hide_left_controller)
@@ -818,25 +818,27 @@ void scenes::lobby::render(const XrFrameState & frame_state)
 		else
 			xyz_axes_right_controller->visible = false;
 
-		for ( int i = 0; i < sizeof(hide_tracker); i++ ) {
+		for (int i = 0; i < hide_tracker.size(); i++)
+		{
 			if (hide_tracker[i])
-				xyz_axes_tracker[i]->visible = false;
+				xyz_axes_trackers[i]->visible = false;
 			else if (auto location = application::locate_controller(application::space(tracker[i]), world_space, frame_state.predictedDisplayTime))
 			{
-				xyz_axes_tracker[i]->visible = true;
-				xyz_axes_tracker[i]->position = location->first;
-				xyz_axes_tracker[i]->orientation = location->second;
+				xyz_axes_trackers[i]->visible = true;
+				xyz_axes_trackers[i]->position = location->first;
+				xyz_axes_trackers[i]->orientation = location->second;
 			}
 			else
-				xyz_axes_tracker[i]->visible = false;
+				xyz_axes_trackers[i]->visible = false;
 		}
 	}
 	else
 	{
 		xyz_axes_left_controller->visible = false;
 		xyz_axes_right_controller->visible = false;
-		for ( int i = 0; i < 5; i++ ) {
-			xyz_axes_tracker[i]->visible = false;
+		for (auto & tracker_axes: xyz_axes_trackers)
+		{
+			tracker_axes->visible = false;
 		}
 	}
 #endif
@@ -1109,9 +1111,10 @@ void scenes::lobby::on_focused()
 	xyz_axes_right_controller = controllers_scene_data.new_node();
 	controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_right_controller);
 
-	for ( int i = 0; i < 5; i++ ) {
-		xyz_axes_tracker[i] = controllers_scene_data.new_node();
-		controllers_scene_data.import(loader("xyz-arrows.glb"), xyz_axes_tracker[i]);
+	for (auto & tracker_axes: xyz_axes_trackers)
+	{
+		tracker_axes = controllers_scene_data.new_node();
+		controllers_scene_data.import(loader("xyz-arrows.glb"), tracker_axes);
 	};
 #endif
 
