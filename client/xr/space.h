@@ -38,12 +38,6 @@ enum class spaces
 	palm_left,
 	palm_right,
 
-	tracker_0,
-	tracker_1,
-	tracker_2,
-	tracker_3,
-	tracker_4,
-
 	count
 };
 } // namespace xr

@@ -30,6 +30,7 @@
 #include "wifi_lock.h"
 #include "xr/actionset.h"
 #include "xr/check.h"
+#include "xr/htc_xr_tracker.h"
 #include "xr/xr.h"
 #include <algorithm>
 #include <boost/locale.hpp>
@@ -253,14 +254,9 @@ static std::vector<interaction_profile> interaction_profiles{
                 }},
         interaction_profile{
                 "/interaction_profiles/htc/vive_xr_tracker",
-                {"XR_HTC_vive_xr_tracker_interaction"},
-                {
-                        "/user/xr_tracker_htc/vive_ultimate_tracker_0/input/entity_htc/pose",
-                        "/user/xr_tracker_htc/vive_ultimate_tracker_1/input/entity_htc/pose",
-                        "/user/xr_tracker_htc/vive_ultimate_tracker_2/input/entity_htc/pose",
-                        "/user/xr_tracker_htc/vive_ultimate_tracker_3/input/entity_htc/pose",
-                        "/user/xr_tracker_htc/vive_ultimate_tracker_4/input/entity_htc/pose",
-                }},
+                {"XR_HTC_vive_xr_tracker_interaction",
+                 "XR_HTC_path_enumeration"},
+                {}},
         interaction_profile{
                 "/interaction_profiles/ext/eye_gaze_interaction",
                 {"XR_EXT_eye_gaze_interaction"},
@@ -660,6 +656,24 @@ void application::initialize_actions()
 		if (!profile.available)
 			continue;
 
+		// Dynamically add VIVE XR Trackers to the profile if available
+		if (utils::contains(profile.required_extensions, "XR_HTC_path_enumeration"))
+		{
+			auto xr_tracker_user_paths = xr::xr_tracker_get_paths(xr_instance);
+			if (xr_tracker_user_paths)
+			{
+				for (auto user_path: *xr_tracker_user_paths)
+				{
+					auto xr_tracker_input_paths = xr::xr_tracker_get_paths(xr_instance, user_path);
+					for (auto input_path: *xr_tracker_input_paths)
+					{
+						profile.input_sources.push_back(path_to_string(user_path) + path_to_string(input_path));
+						spdlog::info(path_to_string(user_path) + path_to_string(input_path));
+					}
+				}
+			}
+		}
+
 		// Patch profile to add palm_ext
 		if (utils::contains(xr_extensions, XR_EXT_PALM_POSE_EXTENSION_NAME)               //
 		    and utils::contains(profile.input_sources, "/user/hand/left/input/grip/pose") //
@@ -705,16 +719,8 @@ void application::initialize_actions()
 			spaces[size_t(xr::spaces::palm_right)] = xr_session.create_action_space(a);
 		else if (name == "/user/hand/left/input/palm_ext/pose")
 			spaces[size_t(xr::spaces::palm_left)] = xr_session.create_action_space(a);
-		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_0/input/entity_htc/pose")
-			spaces[size_t(xr::spaces::tracker_0)] = xr_session.create_action_space(a);
-		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_1/input/entity_htc/pose")
-			spaces[size_t(xr::spaces::tracker_1)] = xr_session.create_action_space(a);
-		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_2/input/entity_htc/pose")
-			spaces[size_t(xr::spaces::tracker_2)] = xr_session.create_action_space(a);
-		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_3/input/entity_htc/pose")
-			spaces[size_t(xr::spaces::tracker_3)] = xr_session.create_action_space(a);
-		else if (name == "/user/xr_tracker_htc/vive_ultimate_tracker_4/input/entity_htc/pose")
-			spaces[size_t(xr::spaces::tracker_4)] = xr_session.create_action_space(a);
+		else if (name.contains("/input/entity_htc/pose"))
+			xr::xr_tracker_spaces.emplace_back(xr_session.create_action_space(a));
 	}
 
 	// Build an action set for each scene

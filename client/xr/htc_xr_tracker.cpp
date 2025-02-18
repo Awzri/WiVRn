@@ -1,0 +1,101 @@
+/*
+ * WiVRn VR streaming
+ * Copyright (C) 2025  Awzri <awzri@awzricat.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "htc_xr_tracker.h"
+#include "wivrn_packets.h"
+#include "xr/instance.h"
+#include "xr/session.h"
+#include <spdlog/spdlog.h>
+#include <openxr/openxr.h>
+
+// Note: This utilizes extensions not present in the OpenXR spec!
+// For more info see:
+// https://hub.vive.com/apidoc/api/VIVE.OpenXR.Tracker.ViveXRTracker.html
+// https://hub.vive.com/apidoc/api/VIVE.OpenXR.VivePathEnumerationHelper.xrEnumeratePathsForInteractionProfileHTCDelegate.html
+
+std::vector<xr::space> xr::xr_tracker_spaces;
+
+// Obtains a vector of user paths for Ultimate Trackers
+std::optional<std::vector<XrPath>> xr::xr_tracker_get_paths(instance & inst, XrPath user_path)
+{
+	xr::PFN_xrEnumeratePathsForInteractionProfileHTC xrEnumeratePathsForInteractionProfileHTC = inst.get_proc<xr::PFN_xrEnumeratePathsForInteractionProfileHTC>("xrEnumeratePathsForInteractionProfileHTC");
+
+	if (!xrEnumeratePathsForInteractionProfileHTC)
+		return {};
+
+	XrPath tracker_profile = inst.string_to_path("/interaction_profiles/htc/vive_xr_tracker");
+
+	// Yes, this is the structure type VIVE themselves gives it
+	// https://github.com/ViveSoftware/VIVE-OpenXR-Unity/blob/25a5fd212420688952ead9deba735357656278ec/com.htc.upm.vive.openxr/Runtime/Features/PathEnumerate/Scripts/VivePathEnumeration.cs#L211
+	// TODO wait for when vive makes a proper type and insert it when released
+	XrPathsForInteractionProfileEnumerateInfoHTC enum_info{
+	        .type = XR_TYPE_UNKNOWN,
+	        .next = nullptr,
+	        .interactionProfile = tracker_profile,
+	        .userPath = user_path};
+
+	uint32_t buffer_length = 0;
+	CHECK_XR(xrEnumeratePathsForInteractionProfileHTC(inst, enum_info, 0, &buffer_length, NULL));
+	XrPath * xr_tracker_paths = new XrPath[buffer_length];
+	CHECK_XR(xrEnumeratePathsForInteractionProfileHTC(inst, enum_info, buffer_length, &buffer_length, xr_tracker_paths));
+
+	std::vector<XrPath> output;
+	for (int i = 0; i < buffer_length; i++)
+	{
+		if (xr_tracker_paths[i] == 0)
+			break;
+		output.emplace_back(xr_tracker_paths[i]);
+	};
+
+	delete[] xr_tracker_paths;
+
+	return output;
+}
+
+// Obtains Ultimate Tracker roles and puts it in a vector.
+// Note: This may be useless if just tracker ID is necessary!
+std::optional<std::vector<std::string>> xr::xr_tracker_get_roles(instance & inst, session & session)
+{
+	auto tracker_paths = xr_tracker_get_paths(inst);
+
+	if (!tracker_paths)
+		return {};
+
+	std::vector<std::string> tracker_roles;
+
+	for (auto & path: *tracker_paths)
+	{
+		auto name_info = XrInputSourceLocalizedNameGetInfo{
+		        .type = XR_TYPE_INPUT_SOURCE_LOCALIZED_NAME_GET_INFO,
+		        .next = nullptr,
+		        .sourcePath = path,
+		        .whichComponents = XR_INPUT_SOURCE_LOCALIZED_NAME_USER_PATH_BIT};
+
+		uint32_t buffer_length = 0;
+		CHECK_XR(xrGetInputSourceLocalizedName(session, &name_info, 0, &buffer_length, NULL));
+		char * role_name = new char[buffer_length];
+		CHECK_XR(xrGetInputSourceLocalizedName(session, &name_info, buffer_length, &buffer_length, role_name));
+
+		tracker_roles.emplace_back(role_name);
+
+		delete[] role_name;
+	}
+
+	return tracker_roles;
+}
+
