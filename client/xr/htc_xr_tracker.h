@@ -41,4 +41,5 @@ extern PFN_xrEnumeratePathsForInteractionProfileHTC xrEnumeratePathsForInteracti
 
 std::optional<std::vector<XrPath>> xr_tracker_get_paths(instance & inst, XrPath user_path = XR_NULL_PATH);
 std::optional<std::vector<std::string>> xr_tracker_get_roles(instance & inst, session & session);
+std::optional<std::vector<wivrn::from_headset::tracking::tracker_role>> xr_tracker_get_roles_enum(instance & inst, session & session);
 } // namespace xr

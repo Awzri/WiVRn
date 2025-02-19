@@ -99,3 +99,47 @@ std::optional<std::vector<std::string>> xr::xr_tracker_get_roles(instance & inst
 	return tracker_roles;
 }
 
+// Puts tracker roles as the enum
+std::optional<std::vector<wivrn::from_headset::tracking::tracker_role>> xr::xr_tracker_get_roles_enum(instance & inst, session & session)
+{
+	auto tracker_roles = xr_tracker_get_roles(inst, session);
+
+	if (!tracker_roles)
+		return {};
+
+	std::vector<wivrn::from_headset::tracking::tracker_role> tracker_enums;
+
+	for (auto & role: *tracker_roles)
+	{
+		if (role == "Standalone")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::generic_tracked);
+		else if (role == "Chest")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::chest);
+		else if (role == "Waist")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::waist);
+		else if (role == "Left Elbow")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::left_elbow);
+		else if (role == "Right Elbow")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::right_elbow);
+		else if (role == "Left Wrist")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::left_wrist);
+		else if (role == "Right Wrist")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::right_wrist);
+		else if (role == "Left Knee")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::left_knee);
+		else if (role == "Right Knee")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::right_knee);
+		else if (role == "Left Ankle")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::left_ankle);
+		else if (role == "Right Ankle")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::right_ankle);
+		else if (role == "Left Foot")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::left_foot);
+		else if (role == "Right Foot")
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::right_foot);
+		else
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::untracked);
+	}
+
+	return tracker_enums;
+}

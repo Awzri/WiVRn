@@ -81,6 +81,14 @@ enum class device_id : uint8_t
 	RIGHT_THUMBSTICK_TOUCH,  // /user/hand/right/input/thumbstick/touch
 	RIGHT_THUMBREST_TOUCH,   // /user/hand/right/input/thumbrest/touch
 	EYE_GAZE,                // /user/eyes_ext/input/gaze_ext/pose
+	OPTIONAL_1,              // OPTIONAL: any optional tracker requiring ONLY pose
+	OPTIONAL_2,
+	OPTIONAL_3,
+	OPTIONAL_4,
+	OPTIONAL_5,
+	OPTIONAL_6,
+	OPTIONAL_7,
+	OPTIONAL_8,              // Only allow 8 optional generic trackers through. This should be enough for most people and applications.
 };
 
 enum video_codec
@@ -206,6 +214,26 @@ struct tracking
 
 	std::array<view, 2> views;
 	std::vector<pose> device_poses;
+
+	enum tracker_role : uint8_t
+	{
+		untracked,
+		generic_tracked,
+		chest,
+		waist,
+		left_elbow,
+		right_elbow,
+		left_wrist,
+		right_wrist,
+		left_knee,
+		right_knee,
+		left_ankle,
+		right_ankle,
+		left_foot,
+		right_foot
+	};
+
+	std::optional<std::vector<tracker_role>> tracker_roles;
 
 	struct fb_face2
 	{
@@ -501,6 +529,14 @@ struct tracking_control
 		right_palm,
 		left_hand,
 		right_hand,
+		optional_1,
+		optional_2,
+		optional_3,
+		optional_4,
+		optional_5,
+		optional_6,
+		optional_7,
+		optional_8,
 		face,
 		battery,
 		microphone,
