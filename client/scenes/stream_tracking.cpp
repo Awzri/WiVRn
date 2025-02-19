@@ -154,23 +154,6 @@ static bool enabled(const to_headset::tracking_control & control, device_id id)
 			return control.enabled[size_t(tid::right_grip)];
 		case device_id::RIGHT_PALM:
 			return control.enabled[size_t(tid::right_palm)];
-
-		case device_id::OPTIONAL_1:
-			return control.enabled[size_t(tid::optional_1)];
-		case device_id::OPTIONAL_2:
-			return control.enabled[size_t(tid::optional_2)];
-		case device_id::OPTIONAL_3:
-			return control.enabled[size_t(tid::optional_3)];
-		case device_id::OPTIONAL_4:
-			return control.enabled[size_t(tid::optional_4)];
-		case device_id::OPTIONAL_5:
-			return control.enabled[size_t(tid::optional_5)];
-		case device_id::OPTIONAL_6:
-			return control.enabled[size_t(tid::optional_6)];
-		case device_id::OPTIONAL_7:
-			return control.enabled[size_t(tid::optional_7)];
-		case device_id::OPTIONAL_8:
-			return control.enabled[size_t(tid::optional_8)];
 		default:
 			break;
 	}
@@ -207,23 +190,6 @@ void scenes::stream::tracking()
 		spaces.emplace_back(device_id::LEFT_PALM, palm);
 	if (XrSpace palm = application::space(xr::spaces::palm_right))
 		spaces.emplace_back(device_id::RIGHT_PALM, palm);
-
-	if (XrSpace optional = xr::xr_tracker_spaces[0])
-		spaces.emplace_back(device_id::OPTIONAL_1, optional);
-	if (XrSpace optional = xr::xr_tracker_spaces[1])
-		spaces.emplace_back(device_id::OPTIONAL_2, optional);
-	if (XrSpace optional = xr::xr_tracker_spaces[2])
-		spaces.emplace_back(device_id::OPTIONAL_3, optional);
-	if (XrSpace optional = xr::xr_tracker_spaces[3])
-		spaces.emplace_back(device_id::OPTIONAL_4, optional);
-	if (XrSpace optional = xr::xr_tracker_spaces[4])
-		spaces.emplace_back(device_id::OPTIONAL_5, optional);
-	if (XrSpace optional = xr::xr_tracker_spaces[5])
-		spaces.emplace_back(device_id::OPTIONAL_6, optional);
-	if (XrSpace optional = xr::xr_tracker_spaces[6])
-		spaces.emplace_back(device_id::OPTIONAL_7, optional);
-	if (XrSpace optional = xr::xr_tracker_spaces[7])
-		spaces.emplace_back(device_id::OPTIONAL_8, optional);
 
 	const auto & config = application::get_config();
 
@@ -316,7 +282,24 @@ void scenes::stream::tracking()
 
 					if (instance.has_extension("XR_HTC_vive_xr_tracker_interaction") and
 					    instance.has_extension("XR_HTC_path_enumeration"))
-						packet.tracker_roles = xr::xr_tracker_get_roles_enum(instance, session);
+					{
+						for (uint8_t i = 0; i < size(xr::xr_tracker_spaces); i++)
+						{
+							XrSpace space = xr::xr_tracker_spaces[i];
+							XrSpaceLocation location{.type = XR_TYPE_SPACE_LOCATION};
+							xrLocateSpace(space, world_space, t0 + Δt, &location);
+							// If location and orientation is invalid, the tracker is disconnected. Don't send it in that case.
+							if (location.locationFlags == (XR_SPACE_LOCATION_ORIENTATION_VALID_BIT | XR_SPACE_LOCATION_POSITION_VALID_BIT))
+							{
+								auto new_tracker = wivrn::from_headset::tracking::extra_tracker{
+								        .id = i,
+								        .pose = location.pose,
+								        .role = xr::xr_tracker_get_roles_enum(instance, session)[i],
+								};
+								packet.extra_trackers.emplace_back(new_tracker);
+							}
+						}
+					}
 
 					// Hand tracking data are very large, send fewer samples than other items
 					if (hand_tracking and t0 >= last_hand_sample + period and

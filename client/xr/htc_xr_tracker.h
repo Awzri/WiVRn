@@ -39,7 +39,7 @@ extern std::vector<xr::space> xr_tracker_spaces;
 typedef XrResult(XRAPI_PTR * PFN_xrEnumeratePathsForInteractionProfileHTC)(XrInstance instance, XrPathsForInteractionProfileEnumerateInfoHTC createInfo, uint32_t pathCapacityInput, uint32_t * pathCountOutput, XrPath * paths);
 extern PFN_xrEnumeratePathsForInteractionProfileHTC xrEnumeratePathsForInteractionProfileHTC;
 
-std::optional<std::vector<XrPath>> xr_tracker_get_paths(instance & inst, XrPath user_path = XR_NULL_PATH);
-std::optional<std::vector<std::string>> xr_tracker_get_roles(instance & inst, session & session);
-std::optional<std::vector<wivrn::from_headset::tracking::tracker_role>> xr_tracker_get_roles_enum(instance & inst, session & session);
+std::vector<XrPath> xr_tracker_get_paths(instance & inst, XrPath user_path = XR_NULL_PATH);
+std::vector<std::string> xr_tracker_get_roles(instance & inst, session & session);
+std::vector<wivrn::from_headset::tracking::tracker_role> xr_tracker_get_roles_enum(instance & inst, session & session);
 } // namespace xr

@@ -31,7 +31,7 @@
 std::vector<xr::space> xr::xr_tracker_spaces;
 
 // Obtains a vector of user paths for Ultimate Trackers
-std::optional<std::vector<XrPath>> xr::xr_tracker_get_paths(instance & inst, XrPath user_path)
+std::vector<XrPath> xr::xr_tracker_get_paths(instance & inst, XrPath user_path)
 {
 	xr::PFN_xrEnumeratePathsForInteractionProfileHTC xrEnumeratePathsForInteractionProfileHTC = inst.get_proc<xr::PFN_xrEnumeratePathsForInteractionProfileHTC>("xrEnumeratePathsForInteractionProfileHTC");
 
@@ -69,16 +69,12 @@ std::optional<std::vector<XrPath>> xr::xr_tracker_get_paths(instance & inst, XrP
 
 // Obtains Ultimate Tracker roles and puts it in a vector.
 // Note: This may be useless if just tracker ID is necessary!
-std::optional<std::vector<std::string>> xr::xr_tracker_get_roles(instance & inst, session & session)
+std::vector<std::string> xr::xr_tracker_get_roles(instance & inst, session & session)
 {
 	auto tracker_paths = xr_tracker_get_paths(inst);
-
-	if (!tracker_paths)
-		return {};
-
 	std::vector<std::string> tracker_roles;
 
-	for (auto & path: *tracker_paths)
+	for (auto & path: tracker_paths)
 	{
 		auto name_info = XrInputSourceLocalizedNameGetInfo{
 		        .type = XR_TYPE_INPUT_SOURCE_LOCALIZED_NAME_GET_INFO,
@@ -100,20 +96,14 @@ std::optional<std::vector<std::string>> xr::xr_tracker_get_roles(instance & inst
 }
 
 // Puts tracker roles as the enum
-std::optional<std::vector<wivrn::from_headset::tracking::tracker_role>> xr::xr_tracker_get_roles_enum(instance & inst, session & session)
+std::vector<wivrn::from_headset::tracking::tracker_role> xr::xr_tracker_get_roles_enum(instance & inst, session & session)
 {
 	auto tracker_roles = xr_tracker_get_roles(inst, session);
-
-	if (!tracker_roles)
-		return {};
-
 	std::vector<wivrn::from_headset::tracking::tracker_role> tracker_enums;
 
-	for (auto & role: *tracker_roles)
+	for (auto & role: tracker_roles)
 	{
-		if (role == "Standalone")
-			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::generic_tracked);
-		else if (role == "Chest")
+		if (role == "Chest")
 			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::chest);
 		else if (role == "Waist")
 			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::waist);
@@ -138,7 +128,7 @@ std::optional<std::vector<wivrn::from_headset::tracking::tracker_role>> xr::xr_t
 		else if (role == "Right Foot")
 			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::right_foot);
 		else
-			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::untracked);
+			tracker_enums.emplace_back(wivrn::from_headset::tracking::tracker_role::generic_tracked);
 	}
 
 	return tracker_enums;
