@@ -122,7 +122,7 @@ class application : public singleton<application>
 	xr::actionset xr_actionset;
 	std::vector<std::tuple<XrAction, XrActionType, std::string>> actions;
 
-	bool ultimate_trackers_supported = false;
+	bool vive_xr_trackers_supported = false;
 
 	bool hand_tracking_supported = false;
 	xr::hand_tracker left_hand;
@@ -487,9 +487,9 @@ public:
 		return instance().pico_face_tracker;
 	}
 
-	static bool get_ultimate_trackers_supported()
+	static bool get_vive_xr_trackers_supported()
 	{
-		return instance().ultimate_trackers_supported;
+		return instance().vive_xr_trackers_supported;
 	}
 
 	static const std::vector<std::string> & get_xr_extensions()
