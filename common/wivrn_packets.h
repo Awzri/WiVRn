@@ -289,7 +289,8 @@ struct tracking
 		right_foot
 	};
 
-	struct motion_tracker {
+	struct motion_tracker
+	{
 		uint8_t id;
 		XrPosef pose;
 		tracker_role role;
