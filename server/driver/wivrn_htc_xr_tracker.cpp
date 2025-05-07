@@ -63,7 +63,6 @@ static xrt_result_t wivrn_xr_tracker_get_tracked_pose(xrt_device * xdev,
 wivrn_xr_tracker::wivrn_xr_tracker(xrt_device * hmd, uint8_t id) :
         xrt_device{}, tracker_pose(id), tracker_id(id)
 {
-	std::cout << "Making an XR tracker!" << std::endl;
 	xrt_device * base = this;
 	base->tracking_origin = hmd->tracking_origin;
 
@@ -96,7 +95,6 @@ xrt_space_relation wivrn_xr_tracker::get_tracked_pose(xrt_input_name name, int64
 {
 	if (name == XRT_INPUT_VIVE_TRACKER_GRIP_POSE)
 	{
-		std::cout << "Test" << std::endl;
 		auto [_, relation] = tracker_pose.get_at(at_timestamp_ns);
 		return relation;
 	}
@@ -117,7 +115,6 @@ bool tracker_pose_list::update_tracking(const from_headset::tracking & tracking,
 		if (tracker.id != device)
 			continue;
 
-		std::cout << "Create space" << std::endl;
 		xrt_space_relation space{
 		        .relation_flags = XRT_SPACE_RELATION_BITMASK_ALL,
 		        .pose = xrt_cast(tracker.pose),
@@ -125,8 +122,6 @@ bool tracker_pose_list::update_tracking(const from_headset::tracking & tracking,
 		        .angular_velocity = xrt_vec3{.x = 0, .y = 0, .z = 0}
 		};
 
-		std::cout
-		        << tracker.id << "=" << device << " " << tracking.production_timestamp << " " << tracking.timestamp << " " << tracker.pose.position.y << " " << offset << std::endl;
 		return add_sample(tracking.production_timestamp, tracking.timestamp, space, offset);
 	}
 	return true;
