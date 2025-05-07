@@ -116,6 +116,7 @@ enum class device_id : uint8_t
 	RIGHT_TRACKPAD_FORCE,    // /user/hand/right/input/trackpad/force
 	RIGHT_STYLUS_FORCE,      // /user/hand/right/input/stylus_fb/force
 	EYE_GAZE,                // /user/eyes_ext/input/gaze_ext/pose
+	GENERIC_TRACKER,         // Any generic motion tracker
 };
 
 enum class interaction_profile : uint8_t
