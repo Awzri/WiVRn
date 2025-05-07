@@ -220,7 +220,7 @@ struct headset_info_packet
 	bool eye_gaze;
 	bool palm_pose;
 	bool passthrough;
-	bool motion_tracking;
+	int motion_tracking;
 	face_type face_tracking;
 	std::vector<video_codec> supported_codecs; // from preferred to least preferred
 	std::string system_name;

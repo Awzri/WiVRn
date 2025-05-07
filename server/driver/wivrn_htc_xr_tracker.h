@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include "pose_list.h"
+#include "driver/clock_offset.h"
+#include "driver/history.h"
 #include "wivrn_packets.h"
 #include "xrt/xrt_defines.h"
 #include "xrt/xrt_device.h"
@@ -31,14 +32,30 @@
 namespace wivrn
 {
 
+class tracker_pose_list : public history<tracker_pose_list, xrt_space_relation>
+{
+    std::atomic<tracker_pose_list *> source = nullptr;
+	xrt_pose offset;
+	std::atomic_bool derive_forced = false;
+public:
+    const uint8_t device;
+    static xrt_space_relation extrapolate(const xrt_space_relation & a, const xrt_space_relation & b, int64_t ta, int64_t tb, int64_t t);
+    static xrt_space_relation interpolate(const xrt_space_relation & a, const xrt_space_relation & b, float t);
+
+    tracker_pose_list(uint8_t id) :
+            device(id) {}
+
+    bool update_tracking(const from_headset::tracking & tracking, const clock_offset & offset);
+};
+
 class wivrn_xr_tracker : public xrt_device
 {
 	std::mutex mutex;
 	xrt_input tracker_input;
-	pose_list tracker_pose;
-	uint8_t id;
+	tracker_pose_list tracker_pose;
 
 public:
+    const uint8_t id;
 	wivrn_xr_tracker(xrt_device * hmd, uint8_t id);
 
 	void update_inputs();
