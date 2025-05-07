@@ -55,7 +55,7 @@ class wivrn_xr_tracker : public xrt_device
 	tracker_pose_list tracker_pose;
 
 public:
-    const uint8_t id;
+    const uint8_t tracker_id;
 	wivrn_xr_tracker(xrt_device * hmd, uint8_t id);
 
 	void update_inputs();
