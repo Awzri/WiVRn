@@ -126,7 +126,10 @@ std::vector<wivrn::from_headset::tracking::motion_tracker> xr::xr_tracker_compos
 	{
 		if (tracker.get_active())
 		{
-			packet.emplace_back(wivrn::from_headset::tracking::motion_tracker{.id = tracker.id, .pose = tracker.get_pose(inst, session, time, reference)});
+			packet.emplace_back(
+			        wivrn::from_headset::tracking::motion_tracker{
+			                .id = tracker.id,
+			                .pose = tracker.get_pose(inst, session, time, reference)});
 		}
 	}
 	return packet;

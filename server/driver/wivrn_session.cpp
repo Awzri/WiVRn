@@ -217,6 +217,8 @@ wivrn::wivrn_session::wivrn_session(std::unique_ptr<wivrn_connection> connection
 	}
 	if (get_info().motion_tracking > 0 || is_forced_extension("HTC_vive_xr_tracker_interaction"))
 	{
+        std::cout << "tracker time :)" << std::endl;
+        std::cout << "looks like we have " << get_info().motion_tracking << " tracker(s) to deal with" << std::endl;
 		for (int i = 0; i < get_info().motion_tracking; i++)
 		{
 			htc_xr_tracker.emplace_back(std::make_unique<wivrn_xr_tracker>(&hmd, i));
@@ -418,8 +420,11 @@ void wivrn_session::operator()(const from_headset::tracking & tracking)
 	comp_target->foveation->update_tracking(tracking, offset);
 	if (foveation)
 		foveation->update_tracking(tracking, offset);
-	for (int i = 0; i <= htc_xr_tracker.size(); i++)
-	    htc_xr_tracker[i]->update_tracking(tracking, offset);
+	for (int i = 0; i < htc_xr_tracker.size(); i++)
+	{
+		std::cout << "Updating an XR tracker!" << std::endl;
+		htc_xr_tracker[i]->update_tracking(tracking, offset);
+	}
 
 	if (fb_face2_tracker)
 		fb_face2_tracker->update_tracking(tracking, offset);
