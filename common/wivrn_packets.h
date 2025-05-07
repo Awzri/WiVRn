@@ -276,7 +276,7 @@ struct tracking
 	struct motion_tracker
 	{
 		uint8_t id;
-		XrPosef pose;
+		pose tracker_pose;
 	};
 
 	std::vector<motion_tracker> motion_trackers;

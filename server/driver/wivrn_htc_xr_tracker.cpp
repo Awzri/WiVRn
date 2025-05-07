@@ -37,6 +37,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <string>
 #include <openxr/openxr.h>
 
 namespace wivrn
@@ -75,7 +76,7 @@ wivrn_xr_tracker::wivrn_xr_tracker(xrt_device * hmd, uint8_t id) :
 	position_tracking_supported = true;
 
 	// Print name.
-	strcpy(str, &"WiVRn Vive XR Tracker "[id]);
+	strcpy(str, "WiVRn Vive XR Tracker");
 	strcpy(serial, "WiVRn Vive XR Tracker");
 
 	tracker_input.active = true;
@@ -108,6 +109,17 @@ void wivrn_xr_tracker::update_tracking(const from_headset::tracking & tracking, 
 	tracker_pose.update_tracking(tracking, offset);
 }
 
+static xrt_space_relation_flags convert_flags(uint8_t flags)
+{
+	static_assert(int(from_headset::tracking::position_valid) == XRT_SPACE_RELATION_POSITION_VALID_BIT);
+	static_assert(int(from_headset::tracking::orientation_valid) == XRT_SPACE_RELATION_ORIENTATION_VALID_BIT);
+	static_assert(int(from_headset::tracking::linear_velocity_valid) == XRT_SPACE_RELATION_LINEAR_VELOCITY_VALID_BIT);
+	static_assert(int(from_headset::tracking::angular_velocity_valid) == XRT_SPACE_RELATION_ANGULAR_VELOCITY_VALID_BIT);
+	static_assert(int(from_headset::tracking::orientation_tracked) == XRT_SPACE_RELATION_ORIENTATION_TRACKED_BIT);
+	static_assert(int(from_headset::tracking::position_tracked) == XRT_SPACE_RELATION_POSITION_TRACKED_BIT);
+	return xrt_space_relation_flags(flags);
+}
+
 bool tracker_pose_list::update_tracking(const from_headset::tracking & tracking, const clock_offset & offset)
 {
 	for (const auto & tracker: tracking.motion_trackers)
@@ -116,11 +128,10 @@ bool tracker_pose_list::update_tracking(const from_headset::tracking & tracking,
 			continue;
 
 		xrt_space_relation space{
-		        .relation_flags = XRT_SPACE_RELATION_BITMASK_ALL,
-		        .pose = xrt_cast(tracker.pose),
-		        .linear_velocity = xrt_vec3{.x = 0, .y = 0, .z = 0},
-		        .angular_velocity = xrt_vec3{.x = 0, .y = 0, .z = 0}
-		};
+		        .relation_flags = convert_flags(tracker.tracker_pose.flags),
+		        .pose = xrt_cast(tracker.tracker_pose.pose),
+		        .linear_velocity = xrt_cast(tracker.tracker_pose.linear_velocity),
+		        .angular_velocity = xrt_cast(tracker.tracker_pose.angular_velocity)};
 
 		return add_sample(tracking.production_timestamp, tracking.timestamp, space, offset);
 	}
