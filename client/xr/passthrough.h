@@ -23,6 +23,39 @@
 #include "utils/handle.h"
 #include <variant>
 
+static int XR_TYPE_SYSTEM_PASSTHROUGH_CONFIGURATION_PROPERTIES_HTC = 1000328000;
+static int XR_TYPE_PASSTHROUGH_CONFIGURATION_BASE_HEADER_HTC = 1000328001;
+static int XR_TYPE_PASSTHROUGH_CONFIGURATION_IMAGE_RATE_HTC = 1000328002;
+static int XR_TYPE_PASSTHROUGH_CONFIGURATION_IMAGE_QUALITY_HTC = 1000328003;
+
+typedef struct XrPassthroughConfigurationImageRateHTC
+{
+	int type;
+	const void * XR_MAY_ALIAS next;
+	float srcImageRate;
+	float dstImageRate;
+} XrPassthroughConfigurationImageRateHTC;
+typedef struct XrPassthroughConfigurationImageQualityHTC
+{
+	int type;
+	const void * XR_MAY_ALIAS next;
+	float scale;
+} XrPassthroughConfigurationImageQualityHTC;
+typedef XrResult(XRAPI_PTR * PFN_xrEnumeratePassthroughImageRatesHTC)(
+    XrSession session,
+    uint32_t imageRateCapacityInput,
+    uint32_t * imageRateCountOutput,
+    XrPassthroughConfigurationImageRateHTC * imageRates);
+typedef XrResult(XRAPI_PTR * PFN_xrGetPassthroughConfigurationHTC)(
+    XrSession session,
+    const void * XR_MAY_ALIAS config);
+typedef XrResult(XRAPI_PTR * PFN_xrSetPassthroughConfigurationHTC)(
+    XrSession session,
+    const void * XR_MAY_ALIAS config);
+static PFN_xrEnumeratePassthroughImageRatesHTC xrEnumeratePassthroughImageRatesHTC{};
+static PFN_xrGetPassthroughConfigurationHTC xrGetPassthroughConfigurationHTC{};
+static PFN_xrSetPassthroughConfigurationHTC xrSetPassthroughConfigurationHTC{};
+
 namespace xr
 {
 class instance;
