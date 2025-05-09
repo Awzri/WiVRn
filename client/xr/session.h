@@ -95,5 +95,6 @@ public:
 	{
 		return passthrough;
 	}
+	std::vector<float> get_htc_passthrough_frame_rates();
 };
 } // namespace xr

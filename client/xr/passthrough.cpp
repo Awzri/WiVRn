@@ -18,9 +18,11 @@
  */
 
 #include "passthrough.h"
+#include "application.h"
 #include "openxr/openxr.h"
 #include "session.h"
 #include "xr/check.h"
+#include "xr/details/enumerate.h"
 #include "xr/instance.h"
 
 static PFN_xrDestroyPassthroughLayerFB xrDestroyPassthroughLayerFB{};
@@ -102,6 +104,42 @@ xr::passthrough_htc::passthrough_htc(instance & inst, session & s)
 {
 	PFN_xrCreatePassthroughHTC xrCreatePassthroughHTC = inst.get_proc<PFN_xrCreatePassthroughHTC>("xrCreatePassthroughHTC");
 	xrDestroyPassthroughHTC = inst.get_proc<PFN_xrDestroyPassthroughHTC>("xrDestroyPassthroughHTC");
+
+	// Normal HTC Passthrough takes ~20ms CPU time ON AVERAGE (with up to 100ms peaks) during streams. This is around 10x the normal CPU timings.
+	// This causes applications like wlx-overlay-s to run *very poorly* by default until passthrough is explicitly disabled.
+	// XR_HTC_passthrough_configuration is used to help mitigate this.
+	xrEnumeratePassthroughImageRatesHTC = inst.get_proc<PFN_xrEnumeratePassthroughImageRatesHTC>("xrEnumeratePassthroughImageRatesHTC");
+	xrSetPassthroughConfigurationHTC = inst.get_proc<PFN_xrSetPassthroughConfigurationHTC>("xrSetPassthroughConfigurationHTC");
+	xrGetPassthroughConfigurationHTC = inst.get_proc<PFN_xrGetPassthroughConfigurationHTC>("xrGetPassthroughConfigurationHTC");
+
+	auto & config = application::get_config();
+
+	if (!config.passthrough_rate or config.passthrough_rate.value() == 0)
+	{
+		auto image_rates = xr::details::enumerate<XrPassthroughConfigurationImageRateHTC>(xrEnumeratePassthroughImageRatesHTC, s);
+
+		XrPassthroughConfigurationImageRateHTC lowest_rate{};
+		for (auto i: image_rates)
+		{
+			if (!lowest_rate.srcImageRate or i.srcImageRate < lowest_rate.srcImageRate)
+				lowest_rate = i;
+		}
+		spdlog::info("HTC: Lowering image rate of passthrough to {} FPS.", lowest_rate.dstImageRate);
+		CHECK_XR(xrSetPassthroughConfigurationHTC(s, &lowest_rate));
+	}
+	else
+	{
+		XrPassthroughConfigurationImageRateHTC rate{
+		        .type = XR_TYPE_PASSTHROUGH_CONFIGURATION_IMAGE_RATE_HTC,
+		        .srcImageRate = config.passthrough_rate.value(),
+		        .dstImageRate = config.passthrough_rate.value()};
+		spdlog::info("HTC: Lowering image rate of passthrough to {} FPS", rate.dstImageRate);
+		CHECK_XR(xrSetPassthroughConfigurationHTC(s, &rate));
+	}
+	XrPassthroughConfigurationImageQualityHTC quality{
+	        .type = XR_TYPE_PASSTHROUGH_CONFIGURATION_IMAGE_QUALITY_HTC,
+	        .scale = config.passthrough_scale};
+	CHECK_XR(xrSetPassthroughConfigurationHTC(s, &quality));
 
 	XrPassthroughCreateInfoHTC info{
 	        .type = XR_TYPE_PASSTHROUGH_CREATE_INFO_HTC,

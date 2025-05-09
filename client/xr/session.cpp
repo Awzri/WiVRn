@@ -24,6 +24,7 @@
 #include "openxr/openxr.h"
 #include "utils/contains.h"
 #include "xr/instance.h"
+#include "xr/passthrough.h"
 #include "xr/system.h"
 #include <ranges>
 #include <vulkan/vulkan.h>
@@ -408,4 +409,30 @@ void xr::session::disable_passthrough()
 	if (std::holds_alternative<std::monostate>(passthrough))
 		return;
 	passthrough.emplace<std::monostate>();
+}
+
+std::vector<float> xr::session::get_htc_passthrough_frame_rates()
+{
+    xrEnumeratePassthroughImageRatesHTC = inst->get_proc<PFN_xrEnumeratePassthroughImageRatesHTC>("xrEnumeratePassthroughImageRatesHTC");
+
+	if (xrEnumeratePassthroughImageRatesHTC)
+	{
+		try
+		{
+			auto raw_passthrough_rates = xr::details::enumerate<XrPassthroughConfigurationImageRateHTC>(xrEnumeratePassthroughImageRatesHTC, id);
+			std::vector<float> passthrough_rates;
+			for (auto passthrough_rate: raw_passthrough_rates)
+			{
+				passthrough_rates.emplace_back(passthrough_rate.srcImageRate);
+			}
+
+			return passthrough_rates;
+		}
+		catch (...)
+		{
+			// Return no available frame rate in case of error
+		}
+	}
+
+	return {};
 }

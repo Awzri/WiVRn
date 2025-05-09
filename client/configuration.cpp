@@ -195,6 +195,11 @@ configuration::configuration(xr::system & system)
 		if (auto val = root["resolution_scale"]; val.is_double())
 			resolution_scale = val.get_double();
 
+		if (auto val = root["passthrough_scale"]; val.is_double())
+			passthrough_scale = val.get_double();
+		if (auto val = root["passthrough_rate"]; val.is_double())
+			passthrough_rate = val.get_double();
+
 		if (auto val = root["sgsr"]; val.is_object())
 			parse_sgsr_options(val.get_object());
 
@@ -323,6 +328,9 @@ void configuration::save()
 	if (minimum_refresh_rate)
 		json << ",\"minimum_refresh_rate\":" << *minimum_refresh_rate;
 	json << ",\"resolution_scale\":" << resolution_scale;
+	json << ",\"passthrough_scale\":" << passthrough_scale;
+	if (passthrough_rate)
+	    json << ",\"passthrough_rate\":" << *passthrough_rate;
 	json << ",\"sgsr\":";
 	write_sgsr(json, sgsr);
 	json << ",\"openxr_post_processing\":";
