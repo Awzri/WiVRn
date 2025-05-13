@@ -19,6 +19,7 @@
 #pragma once
 
 #include "wivrn_packets.h"
+#include "xr/htc_oxr_ext.h"
 #include "xr/instance.h"
 #include "xr/session.h"
 #include "xr/space.h"
@@ -28,13 +29,6 @@
 
 namespace xr
 {
-typedef struct XrPathsForInteractionProfileEnumerateInfoHTC
-{
-	XrStructureType type;
-	const void * XR_MAY_ALIAS next;
-	XrPath interactionProfile;
-	XrPath userPath;
-} XrPathsForInteractionProfileEnumerateInfoHTC;
 
 class vive_xr_tracker
 {
@@ -50,9 +44,6 @@ public:
 	bool get_active();
 	xr::space * get_space();
 };
-
-typedef XrResult(XRAPI_PTR * PFN_xrEnumeratePathsForInteractionProfileHTC)(XrInstance instance, XrPathsForInteractionProfileEnumerateInfoHTC createInfo, uint32_t pathCapacityInput, uint32_t * pathCountOutput, XrPath * paths);
-static PFN_xrEnumeratePathsForInteractionProfileHTC xrEnumeratePathsForInteractionProfileHTC{};
 
 void xr_tracker_update_active(instance & inst, session & session);
 std::vector<XrPath> xr_tracker_get_paths(instance & inst, XrPath user_path = XR_NULL_PATH);

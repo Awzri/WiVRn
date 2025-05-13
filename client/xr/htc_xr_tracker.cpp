@@ -40,11 +40,10 @@ wivrn::from_headset::tracking::pose xr::vive_xr_tracker::get_pose(instance & ins
 	XrSpaceLocation location{.type = XR_TYPE_SPACE_LOCATION, .next = &velocity};
 	xrLocateSpace(space, reference, time, &location);
 	wivrn::from_headset::tracking::pose res{
-	    .pose = location.pose,
-		.linear_velocity = velocity.linearVelocity,
-		.angular_velocity = velocity.angularVelocity,
-		.flags = 0
-	};
+	        .pose = location.pose,
+	        .linear_velocity = velocity.linearVelocity,
+	        .angular_velocity = velocity.angularVelocity,
+	        .flags = 0};
 	if (location.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT)
 		res.flags |= wivrn::from_headset::tracking::orientation_valid;
 
@@ -101,7 +100,7 @@ std::vector<XrPath> xr::xr_tracker_get_paths(instance & inst, XrPath user_path)
 {
 	if (!xrEnumeratePathsForInteractionProfileHTC)
 	{
-		xrEnumeratePathsForInteractionProfileHTC = inst.get_proc<xr::PFN_xrEnumeratePathsForInteractionProfileHTC>("xrEnumeratePathsForInteractionProfileHTC");
+		xrEnumeratePathsForInteractionProfileHTC = inst.get_proc<PFN_xrEnumeratePathsForInteractionProfileHTC>("xrEnumeratePathsForInteractionProfileHTC");
 		if (!xrEnumeratePathsForInteractionProfileHTC)
 			return {};
 	}
