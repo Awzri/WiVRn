@@ -329,8 +329,7 @@ void configuration::save()
 		json << ",\"minimum_refresh_rate\":" << *minimum_refresh_rate;
 	json << ",\"resolution_scale\":" << resolution_scale;
 	json << ",\"passthrough_scale\":" << passthrough_scale;
-	if (passthrough_rate)
-	    json << ",\"passthrough_rate\":" << *passthrough_rate;
+	json << ",\"passthrough_rate\":" << passthrough_rate;
 	json << ",\"sgsr\":";
 	write_sgsr(json, sgsr);
 	json << ",\"openxr_post_processing\":";

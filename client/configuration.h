@@ -53,7 +53,7 @@ public:
 	bool show_performance_metrics = false;
 	bool passthrough_enabled = false;
 	float passthrough_scale = 0.5;
-	std::optional<float> passthrough_rate;
+	float passthrough_rate = 0;
 	bool mic_unprocessed_audio = false;
 
 	// Snapdragon Game Super Resolution
