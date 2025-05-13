@@ -1,3 +1,5 @@
+#pragma once
+
 #include <openxr/openxr.h>
 
 #define XR_HTC_VIVE_XR_TRACKER_INTERACTION_EXTENSION_NAME "XR_HTC_vive_xr_tracker_interaction"
@@ -50,3 +52,30 @@ typedef struct XrPathsForInteractionProfileEnumerateInfoHTC
 
 typedef XrResult(XRAPI_PTR * PFN_xrEnumeratePathsForInteractionProfileHTC)(XrInstance instance, XrPathsForInteractionProfileEnumerateInfoHTC createInfo, uint32_t pathCapacityInput, uint32_t * pathCountOutput, XrPath * paths);
 static PFN_xrEnumeratePathsForInteractionProfileHTC xrEnumeratePathsForInteractionProfileHTC{};
+
+#define XR_HTC_COMPOSITION_LAYER_EXTRA_SETTINGS_EXTENSION_NAME "XR_HTC_composition_layer_extra_settings"
+
+// This causes more problems than it solves.
+// We'll just use numerical values for now.
+/* enum XrSharpenSupersampleModeHTC
+{
+    NONE = -1,
+	FAST = 0,
+	NORMAL = 1,
+	QUALITY = 2,
+	AUTO = 3
+	}; */
+
+typedef struct XrCompositionLayerSharpeningSettingHTC
+{
+	int type;
+	const void * XR_MAY_ALIAS next;
+	int /*XrSharpeningModeHTC*/ mode;
+	float sharpeningLevel;
+} XrCompositionLayerSharpeningSettingHTC;
+typedef struct XrCompositionLayerSuperSamplingSettingHTC
+{
+	int type;
+	const void * XR_MAY_ALIAS next;
+	int /*XrSuperSamplingModeHTC*/ mode;
+} XrCompositionLayerSuperSamplingSettingHTC;

@@ -54,6 +54,9 @@ public:
 	bool passthrough_enabled = false;
 	float passthrough_scale = 0.5;
 	float passthrough_rate = 0;
+	int htc_supersampling = -1;
+	int htc_sharpening_quality = -1;
+	float htc_sharpening = 0;
 	bool mic_unprocessed_audio = false;
 
 	// Snapdragon Game Super Resolution
