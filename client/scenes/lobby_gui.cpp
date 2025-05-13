@@ -626,7 +626,7 @@ void scenes::lobby::gui_settings()
 					{
 						session.set_refresh_rate(rate);
 						config.preferred_refresh_rate = rate;
-		                config.passthrough_rate = rate;
+						config.passthrough_rate = rate;
 						config.save();
 					}
 				}
@@ -681,6 +681,31 @@ void scenes::lobby::gui_settings()
 	if (instance.has_extension("XR_HTC_passthrough_configuration"))
 	{
 		{
+			const auto & passthrough_rates = session.get_htc_passthrough_frame_rates();
+			if (not passthrough_rates.empty())
+			{
+				if (ImGui::BeginCombo(_S("HTC Passthrough Frame Rate"), config.passthrough_rate == 0 ? _cS("low", "Low") : _cS("high", "High")))
+				{
+					if (ImGui::Selectable(_cS("low", "Low"), config.passthrough_rate == 0, ImGuiSelectableFlags_SelectOnRelease))
+					{
+						config.passthrough_rate = 0;
+						config.save();
+					}
+					if (ImGui::IsItemHovered())
+						tooltip(_("Selects the lowest passthrough frame rate, usually half the refresh rate.\nThis is the recommended option!"));
+					if (ImGui::Selectable(_cS("high", "High"), config.passthrough_rate == 1, ImGuiSelectableFlags_SelectOnRelease))
+					{
+						config.passthrough_rate = 1;
+						config.save();
+					}
+					if (ImGui::IsItemHovered())
+						tooltip(_("Selects the highest passthrough frame rate, usually matching the refresh rate.\nMay cause heavy lag if passthrough is on during streaming!"));
+					ImGui::EndCombo();
+				}
+				vibrate_on_hover();
+			}
+		}
+		{
 			const auto current = config.passthrough_scale;
 			auto intScale = int(current * 100);
 			const auto slider = ImGui::SliderInt(
@@ -701,37 +726,6 @@ void scenes::lobby::gui_settings()
 				ImGui::TextColored(ImColor(0xf9, 0x73, 0x06) /*orange*/, ICON_FA_TRIANGLE_EXCLAMATION);
 				ImGui::SameLine();
 				ImGui::Text("%s", fmt::format(_F("Passthrough scale higher than 50% may cause performance issues!")).c_str());
-			}
-		}
-		{
-		    const auto & passthrough_rates = session.get_htc_passthrough_frame_rates();
-			if (not passthrough_rates.empty())
-			{
-				float active_rate = config.passthrough_rate.value_or(passthrough_rates.back());
-				ImGui::BeginDisabled(config.preferred_refresh_rate == 0);
-				if (ImGui::BeginCombo(_S("HTC Passthrough Frame Rate"), active_rate ? fmt::format("{}", active_rate).c_str() : _cS("lowest", "Lowest")))
-				{
-					if (ImGui::Selectable(_cS("lowest rate", "Lowest"), config.passthrough_rate == 0, ImGuiSelectableFlags_SelectOnRelease))
-					{
-					    config.passthrough_rate = 0;
-						config.save();
-					}
-					if (ImGui::IsItemHovered())
-						tooltip(_("Always selects the lowest passthrough frame rate.\nThis is the recommended option!"));
-					for (float rate: passthrough_rates)
-					{
-						if (ImGui::Selectable(fmt::format("{}", rate).c_str(), rate == config.passthrough_rate, ImGuiSelectableFlags_SelectOnRelease))
-						{
-							config.passthrough_rate = rate;
-							config.save();
-						}
-					}
-					ImGui::EndCombo();
-				}
-				if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) and (ImGui::GetItemFlags() & ImGuiItemFlags_Disabled))
-					tooltip(_("This cannot be changed while set to automatic refresh rate!"));
-				ImGui::EndDisabled();
-				vibrate_on_hover();
 			}
 		}
 		if (config.passthrough_enabled)

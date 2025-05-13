@@ -114,31 +114,24 @@ xr::passthrough_htc::passthrough_htc(instance & inst, session & s)
 
 	auto & config = application::get_config();
 
-	if (!config.passthrough_rate or config.passthrough_rate.value() == 0)
-	{
-		auto image_rates = xr::details::enumerate<XrPassthroughConfigurationImageRateHTC>(xrEnumeratePassthroughImageRatesHTC, s);
+	auto image_rates = xr::details::enumerate<XrPassthroughConfigurationImageRateHTC>(xrEnumeratePassthroughImageRatesHTC, s);
 
-		XrPassthroughConfigurationImageRateHTC lowest_rate{};
-		for (auto i: image_rates)
-		{
-			if (!lowest_rate.srcImageRate or i.srcImageRate < lowest_rate.srcImageRate)
-				lowest_rate = i;
-		}
-		spdlog::info("HTC: Lowering image rate of passthrough to {} FPS.", lowest_rate.dstImageRate);
-		CHECK_XR(xrSetPassthroughConfigurationHTC(s, &lowest_rate));
-	}
-	else
+	XrPassthroughConfigurationImageRateHTC new_rate{};
+	for (auto i: image_rates)
 	{
-		XrPassthroughConfigurationImageRateHTC rate{
-		        .type = XR_TYPE_PASSTHROUGH_CONFIGURATION_IMAGE_RATE_HTC,
-		        .srcImageRate = config.passthrough_rate.value(),
-		        .dstImageRate = config.passthrough_rate.value()};
-		spdlog::info("HTC: Lowering image rate of passthrough to {} FPS", rate.dstImageRate);
-		CHECK_XR(xrSetPassthroughConfigurationHTC(s, &rate));
+		if (!new_rate.srcImageRate or
+		    (config.passthrough_rate == 0
+		             ? (i.srcImageRate < new_rate.srcImageRate)
+		             : (i.srcImageRate > new_rate.srcImageRate)))
+			new_rate = i;
 	}
+	spdlog::info("HTC: Changing image rate of passthrough to {} FPS.", new_rate.dstImageRate);
+	CHECK_XR(xrSetPassthroughConfigurationHTC(s, &new_rate));
+
 	XrPassthroughConfigurationImageQualityHTC quality{
 	        .type = XR_TYPE_PASSTHROUGH_CONFIGURATION_IMAGE_QUALITY_HTC,
 	        .scale = config.passthrough_scale};
+	spdlog::info("HTC: Changing image quality of passthrough to {}%.", new_rate.dstImageRate);
 	CHECK_XR(xrSetPassthroughConfigurationHTC(s, &quality));
 
 	XrPassthroughCreateInfoHTC info{
