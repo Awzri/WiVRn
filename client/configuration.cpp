@@ -200,6 +200,13 @@ configuration::configuration(xr::system & system)
 		if (auto val = root["passthrough_rate"]; val.is_double())
 			passthrough_rate = val.get_double();
 
+		if (auto val = root["htc_supersampling"]; val.is_int64())
+			htc_supersampling = val.get_int64();
+		if (auto val = root["htc_sharpening_quality"]; val.is_int64())
+			htc_sharpening_quality = val.get_int64();
+		if (auto val = root["htc_sharpening"]; val.is_double())
+			htc_sharpening = val.get_double();
+
 		if (auto val = root["sgsr"]; val.is_object())
 			parse_sgsr_options(val.get_object());
 
@@ -330,6 +337,9 @@ void configuration::save()
 	json << ",\"resolution_scale\":" << resolution_scale;
 	json << ",\"passthrough_scale\":" << passthrough_scale;
 	json << ",\"passthrough_rate\":" << passthrough_rate;
+	json << ",\"htc_supersampling\":" << htc_supersampling;
+	json << ",\"htc_sharpening_quality\":" << htc_sharpening_quality;
+	json << ",\"htc_sharpening\":" << htc_sharpening;
 	json << ",\"sgsr\":";
 	write_sgsr(json, sgsr);
 	json << ",\"openxr_post_processing\":";

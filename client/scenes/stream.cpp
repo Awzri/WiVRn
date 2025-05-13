@@ -32,6 +32,7 @@
 #include "utils/ranges.h"
 #include "vk/pipeline.h"
 #include "vk/shader.h"
+#include "xr/htc_oxr_ext.h"
 #include "wivrn_packets.h"
 #include <algorithm>
 #include <mutex>
@@ -213,10 +214,12 @@ std::shared_ptr<scenes::stream> scenes::stream::create(std::unique_ptr<wivrn_ses
 
 		info.hand_tracking = config.check_feature(feature::hand_tracking);
 		info.eye_gaze = config.check_feature(feature::eye_gaze);
-		if (config.check_feature(feature::motion_tracking)) {
-		    for (auto & tracker: application::get_vive_xr_trackers()) {
+		if (config.check_feature(feature::motion_tracking))
+		{
+			for (auto & tracker: application::get_vive_xr_trackers())
+			{
 				if (tracker.get_active())
-				    info.motion_tracking++;
+					info.motion_tracking++;
 			}
 		}
 
@@ -928,8 +931,10 @@ void scenes::stream::render(const XrFrameState & frame_state)
 	        .views = layer_view.data(),
 	};
 
+	auto & config = application::get_config();
+
 	XrCompositionLayerSettingsFB settings;
-	const configuration::openxr_post_processing_settings openxr_post_processing = application::get_config().openxr_post_processing;
+	const configuration::openxr_post_processing_settings openxr_post_processing = config.openxr_post_processing;
 	if ((openxr_post_processing.sharpening | openxr_post_processing.super_sampling) > 0)
 	{
 		settings = {
@@ -938,6 +943,24 @@ void scenes::stream::render(const XrFrameState & frame_state)
 		};
 		layer.next = &settings;
 	}
+
+	XrCompositionLayerSuperSamplingSettingHTC supersample;
+	XrCompositionLayerSharpeningSettingHTC sharpening;
+	if (config.htc_supersampling != -1)
+		supersample = XrCompositionLayerSuperSamplingSettingHTC{
+		        .type = 1000323002,
+		        .next = nullptr,
+		        .mode = config.htc_supersampling};
+	if (config.htc_sharpening_quality != -1)
+		sharpening = XrCompositionLayerSharpeningSettingHTC{
+		        .type = 1000323001,
+		        .next = config.htc_supersampling != -1 ? &supersample : nullptr,
+		        .mode = config.htc_sharpening_quality,
+		        .sharpeningLevel = config.htc_sharpening};
+	if (config.htc_supersampling != -1)
+		layer.next = &supersample;
+	if (config.htc_sharpening_quality != -1)
+		layer.next = &sharpening;
 
 	std::vector<XrCompositionLayerQuad> imgui_layers;
 	if (imgui_ctx)

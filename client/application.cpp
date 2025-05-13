@@ -1068,6 +1068,7 @@ void application::initialize()
 	opt_extensions.push_back(XR_KHR_COMPOSITION_LAYER_COLOR_SCALE_BIAS_EXTENSION_NAME);
 	opt_extensions.push_back(XR_KHR_VISIBILITY_MASK_EXTENSION_NAME);
 	opt_extensions.push_back(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME);
+	opt_extensions.push_back("XR_HTC_composition_layer_extra_settings");
 
 	for (const auto & i: interaction_profiles)
 	{
@@ -1166,6 +1167,12 @@ void application::initialize()
 	{
 		spdlog::info("    OpenXR post-processing extension support: true");
 		openxr_post_processing_supported = true;
+	}
+
+	if (utils::contains(xr_extensions, "XR_HTC_composition_layer_extra_settings"))
+	{
+		spdlog::info("    HTC post-processing extension support: true");
+		htc_post_processing_supported = true;
 	}
 
 	if (utils::contains(xr_extensions, "XR_HTC_vive_xr_tracker_interaction") and utils::contains(xr_extensions, "XR_HTC_path_enumeration"))

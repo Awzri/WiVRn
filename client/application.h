@@ -141,6 +141,7 @@ class application : public singleton<application>
 	bool eye_gaze_supported = false;
 
 	bool openxr_post_processing_supported = false;
+	bool htc_post_processing_supported = false;
 
 	bool vive_xr_trackers_supported = false;
 	std::vector<xr::vive_xr_tracker> vive_xr_trackers;
@@ -457,6 +458,11 @@ public:
 	static bool get_openxr_post_processing_supported()
 	{
 		return instance().openxr_post_processing_supported;
+	}
+
+	static bool get_htc_post_processing_supported()
+	{
+		return instance().htc_post_processing_supported;
 	}
 
 	static bool get_vive_xr_trackers_supported()

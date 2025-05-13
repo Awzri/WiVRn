@@ -137,6 +137,23 @@ std::string openxr_post_processing_flag_name(XrCompositionLayerSettingsFlagsFB f
 	}
 }
 
+std::string htc_post_processing_names(int mode)
+{
+	switch (mode)
+	{
+		case 0:
+			return _cS("fast_processing", "Fast");
+		case 1:
+			return _cS("normal_processing", "Normal");
+		case 2:
+			return _cS("quality_processing", "Quality");
+		case 3:
+			return _cS("auto_processing", "Auto");
+		default:
+			return _cS("no_processing", "Disabled");
+	}
+}
+
 void scenes::lobby::tooltip(std::string_view text)
 {
 	// FIXME: this is incorrect if we use the docking branch of imgui
@@ -718,7 +735,6 @@ void scenes::lobby::gui_settings()
 			{
 				config.passthrough_scale = intScale * 0.01;
 				config.save();
-				spdlog::info("Setting passthrough scale to {}", intScale * 0.01);
 			}
 			vibrate_on_hover();
 			if (intScale > 50)
@@ -947,6 +963,60 @@ void scenes::lobby::gui_post_processing()
 			}
 		}
 		ImGui::Unindent();
+	}
+
+	if (application::get_htc_post_processing_supported())
+	{
+		{
+			int current = config.htc_supersampling;
+			if (ImGui::BeginCombo(_S("HTC Super Sampling Quality"), htc_post_processing_names(current).c_str()))
+			{
+				for (int i = -1; i <= 3; i++)
+				{
+					if (ImGui::Selectable(htc_post_processing_names(i).c_str(), current == i, ImGuiSelectableFlags_SelectOnRelease))
+					{
+						config.htc_supersampling = i;
+						config.save();
+					}
+					vibrate_on_hover();
+				}
+				ImGui::EndCombo();
+			}
+			vibrate_on_hover();
+		}
+		{
+			int current = config.htc_sharpening_quality;
+			if (ImGui::BeginCombo(_S("HTC Sharpening Quality"), htc_post_processing_names(current).c_str()))
+			{
+				for (int i = -1; i <= 3; i++)
+				{
+					if (ImGui::Selectable(htc_post_processing_names(i).c_str(), current == i, ImGuiSelectableFlags_SelectOnRelease))
+					{
+						config.htc_sharpening_quality = i;
+						config.save();
+					}
+					vibrate_on_hover();
+				}
+				ImGui::EndCombo();
+			}
+			vibrate_on_hover();
+		}
+		{
+			const auto current = config.htc_sharpening;
+			auto intScale = int(current * 100);
+			const auto slider = ImGui::SliderInt(
+			        _("HTC Sharpening").append("##htc_sharpening").c_str(),
+			        &intScale,
+			        0,
+			        100,
+			        fmt::format(_F("%d%%")).c_str());
+			if (slider)
+			{
+				config.htc_sharpening = intScale * 0.01;
+				config.save();
+			}
+			vibrate_on_hover();
+		}
 	}
 
 	{
