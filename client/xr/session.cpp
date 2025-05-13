@@ -413,7 +413,7 @@ void xr::session::disable_passthrough()
 
 std::vector<float> xr::session::get_htc_passthrough_frame_rates()
 {
-    xrEnumeratePassthroughImageRatesHTC = inst->get_proc<PFN_xrEnumeratePassthroughImageRatesHTC>("xrEnumeratePassthroughImageRatesHTC");
+	xrEnumeratePassthroughImageRatesHTC = inst->get_proc<PFN_xrEnumeratePassthroughImageRatesHTC>("xrEnumeratePassthroughImageRatesHTC");
 
 	if (xrEnumeratePassthroughImageRatesHTC)
 	{

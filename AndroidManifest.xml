@@ -60,7 +60,7 @@
     <uses-feature android:name="wave.feature.eyetracking" android:required="false" />
     <uses-feature android:name="wave.feature.lipexpression" android:required="false" />
     <uses-feature android:name="wave.feature.tracker" android:required="false" />
-    <uses-feature android:name="wave.feature.simultaneous_interaction" android:required="false" />
+    <uses-feature android:name="wave.feature.simultaneous_interaction" android:required="true" />
 
     <application
         android:allowBackup="false"
