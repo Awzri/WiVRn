@@ -76,8 +76,10 @@ wivrn_xr_tracker::wivrn_xr_tracker(xrt_device * hmd, uint8_t id) :
 	position_tracking_supported = true;
 
 	// Print name.
-	strcpy(str, "WiVRn Vive XR Tracker");
-	strcpy(serial, "WiVRn Vive XR Tracker");
+	std::string tracker_name = "WiVRn Vive XR Tracker ";
+	tracker_name.append(std::to_string(id));
+	strcpy(str, tracker_name.c_str());
+	strcpy(serial, tracker_name.c_str());
 
 	tracker_input.active = true;
 	tracker_input.name = XRT_INPUT_VIVE_TRACKER_GRIP_POSE;
