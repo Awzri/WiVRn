@@ -114,16 +114,22 @@ xr::passthrough_htc::passthrough_htc(instance & inst, session & s)
 
 	auto & config = application::get_config();
 
-	auto image_rates = xr::details::enumerate<XrPassthroughConfigurationImageRateHTC>(xrEnumeratePassthroughImageRatesHTC, s);
-
 	XrPassthroughConfigurationImageRateHTC new_rate{};
-	for (auto i: image_rates)
+	// This is a race condition. I don't know why or how.
+	// but let's make sure we actually have a image rate before trying to set it.
+	// TODO: If this fails too much we should probably just silently fail and not set the rate instead
+	//       Also, make less hacky too kthx :)
+	while (new_rate.srcImageRate < 1)
 	{
-		if (!new_rate.srcImageRate or
-		    (config.passthrough_rate == 0
-		             ? (i.srcImageRate < new_rate.srcImageRate)
-		             : (i.srcImageRate > new_rate.srcImageRate)))
-			new_rate = i;
+		auto image_rates = xr::details::enumerate<XrPassthroughConfigurationImageRateHTC>(xrEnumeratePassthroughImageRatesHTC, s);
+		for (auto i: image_rates)
+		{
+			if (!new_rate.srcImageRate or
+			    (config.passthrough_rate == 0
+			             ? (i.srcImageRate < new_rate.srcImageRate)
+			             : (i.srcImageRate > new_rate.srcImageRate)))
+				new_rate = i;
+		}
 	}
 	spdlog::info("HTC: Changing image rate of passthrough to {} FPS.", new_rate.dstImageRate);
 	CHECK_XR(xrSetPassthroughConfigurationHTC(s, &new_rate));
