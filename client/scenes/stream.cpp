@@ -32,8 +32,8 @@
 #include "utils/ranges.h"
 #include "vk/pipeline.h"
 #include "vk/shader.h"
-#include "xr/htc_oxr_ext.h"
 #include "wivrn_packets.h"
+#include "xr/htc_oxr_ext.h"
 #include <algorithm>
 #include <mutex>
 #include <ranges>
@@ -946,21 +946,21 @@ void scenes::stream::render(const XrFrameState & frame_state)
 
 	XrCompositionLayerSuperSamplingSettingHTC supersample;
 	XrCompositionLayerSharpeningSettingHTC sharpening;
-	if (config.htc_supersampling != -1)
-		supersample = XrCompositionLayerSuperSamplingSettingHTC{
-		        .type = 1000323002,
-		        .next = nullptr,
-		        .mode = config.htc_supersampling};
 	if (config.htc_sharpening_quality != -1)
 		sharpening = XrCompositionLayerSharpeningSettingHTC{
 		        .type = 1000323001,
-		        .next = config.htc_supersampling != -1 ? &supersample : nullptr,
+		        .next = nullptr,
 		        .mode = config.htc_sharpening_quality,
 		        .sharpeningLevel = config.htc_sharpening};
 	if (config.htc_supersampling != -1)
-		layer.next = &supersample;
+		supersample = XrCompositionLayerSuperSamplingSettingHTC{
+		        .type = 1000323002,
+		        .next = config.htc_sharpening != -1 ? &sharpening : nullptr,
+		        .mode = config.htc_supersampling};
 	if (config.htc_sharpening_quality != -1)
 		layer.next = &sharpening;
+	if (config.htc_supersampling != -1)
+		layer.next = &supersample;
 
 	std::vector<XrCompositionLayerQuad> imgui_layers;
 	if (imgui_ctx)
