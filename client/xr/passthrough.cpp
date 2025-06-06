@@ -119,15 +119,15 @@ xr::passthrough_htc::passthrough_htc(instance & inst, session & s)
 	// but let's make sure we actually have a image rate before trying to set it.
 	// TODO: If this fails too much we should probably just silently fail and not set the rate instead
 	//       Also, make less hacky too kthx :)
-	while (new_rate.srcImageRate < 1)
+	while (new_rate.dstImageRate < 1)
 	{
 		auto image_rates = xr::details::enumerate<XrPassthroughConfigurationImageRateHTC>(xrEnumeratePassthroughImageRatesHTC, s);
 		for (auto i: image_rates)
 		{
-			if (!new_rate.srcImageRate or
+			if (!new_rate.dstImageRate or
 			    (config.passthrough_rate == 0
-			             ? (i.srcImageRate < new_rate.srcImageRate)
-			             : (i.srcImageRate > new_rate.srcImageRate)))
+			             ? (i.dstImageRate < new_rate.dstImageRate)
+			             : (i.dstImageRate > new_rate.dstImageRate)))
 				new_rate = i;
 		}
 	}
