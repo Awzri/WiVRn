@@ -114,7 +114,6 @@ class wivrn_session : public xrt_system_devices
 	std::shared_ptr<wivrn_comp_target> comp_target;
 	std::vector<std::unique_ptr<wivrn_xr_tracker>> htc_xr_tracker;
 	std::unique_ptr<wivrn_foveation> foveation;
-	wivrn_comp_target * comp_target;
 
 	clock_offset_estimator offset_est;
 
